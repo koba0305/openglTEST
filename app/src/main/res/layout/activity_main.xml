@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#161A12">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/versionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Version"
+            android:textColor="#F4F0A8"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Wallpaper Tuning"
+            android:textColor="#F5F27C"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="ラインは維持しつつ、手前の壊れ方を調整します。壁紙が動作中なら値の保存後に切り替え直すと反映が分かりやすいです。"
+            android:textColor="#C9D180"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="RGBずれ"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/rgbSplitValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F27C"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/rgbSplitSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="パララックス感度"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/parallaxValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F27C"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/parallaxSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="チカチカ方式"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <RadioGroup
+            android:id="@+id/flickerModeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/flickerModeAlways"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="常にチカチカ"
+                android:textColor="#F5F27C" />
+
+            <RadioButton
+                android:id="@+id/flickerModeTilt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="動きでチカチカ"
+                android:textColor="#F5F27C" />
+
+            <RadioButton
+                android:id="@+id/flickerModeNone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="チカチカなし"
+                android:textColor="#F5F27C" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="手前ドットサイズ"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/frontDotSizeValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F27C"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/frontDotSizeSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="手前チカチカ量"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/frontDotBreakupValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F27C"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/frontDotBreakupSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="L0最大サイズ"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/l0MaxSizeValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F27C"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/l0MaxSizeSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="縦帯の最大幅"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/stripeMaxWidthValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F27C"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/stripeMaxWidthSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="色の幅"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/colorVarianceValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F27C"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/colorVarianceSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="異色の混ざり"
+            android:textColor="#EAF59B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/accentChanceValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F27C"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/accentChanceSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnSetWallpaper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="ライブ壁紙を設定" />
+
+    </LinearLayout>
+</ScrollView>
