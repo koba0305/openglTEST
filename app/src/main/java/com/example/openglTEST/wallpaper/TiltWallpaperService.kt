@@ -374,7 +374,8 @@ private class GridRenderer(
 
     // ---------- layers / palette ----------
     private val layers: List<LayerCfg>
-    private val paletteFloats: List<FloatArray>
+    private var paletteFloats: List<FloatArray>
+    private var currentPaletteAsset: String? = null
 
     init {
         val baseLayers = pack?.layers ?: listOf(
@@ -399,6 +400,7 @@ private class GridRenderer(
             PaletteItem("#00331A", 1.0)
         )
         paletteFloats = rawPalette.map { parseHexColor(it.hex) }
+        refreshPaletteAsset(tuning.paletteAsset)
     }
 
     private fun parseHexColor(hex: String): FloatArray {
@@ -407,6 +409,21 @@ private class GridRenderer(
         val g = clean.substring(2, 4).toInt(16) / 255f
         val b = clean.substring(4, 6).toInt(16) / 255f
         return floatArrayOf(r, g, b)
+    }
+
+    private fun refreshPaletteAsset(assetName: String) {
+        if (assetName == currentPaletteAsset) return
+        try {
+            val txt = context.assets.open(assetName).bufferedReader().use { it.readText() }
+            val loadedPack = Gson().fromJson(txt, Pack::class.java)
+            val loadedPalette = loadedPack?.palette.orEmpty()
+            if (loadedPalette.isNotEmpty()) {
+                paletteFloats = loadedPalette.map { parseHexColor(it.hex) }
+                currentPaletteAsset = assetName
+            }
+        } catch (e: Exception) {
+            Log.w("TiltWP", "palette asset load failed: $assetName ${e.message}")
+        }
     }
 
     private fun colorAt(index: Int): FloatArray {
@@ -750,6 +767,7 @@ private class GridRenderer(
     fun draw(w: Int, h: Int, tiltX: Float, tiltY: Float, tiltMotion: Float, timeSec: Float) {
         if (program == 0) return
         tuning = WallpaperTuning.load(context)
+        refreshPaletteAsset(tuning.paletteAsset)
 
         GLES20.glUseProgram(program)
 
