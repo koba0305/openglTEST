@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             )),
             Preset("P5", "P5 Corrupt", WallpaperTuning.DEFAULT.copy(
                 presetId = "P5",
-                paletteAsset = "pack_vivid_test.json",
+                paletteAsset = "pack_supervivid_test.json",
                 rgbSplitPx = 18f,
                 frontDotSizePx = 22f,
                 frontFlicker = 0.96f,
@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
             )),
             Preset("P8", "P8 Neon", WallpaperTuning.DEFAULT.copy(
                 presetId = "P8",
-                paletteAsset = "pack_vivid_test.json",
+                paletteAsset = "pack_supervivid_test.json",
                 rgbSplitPx = 20f,
                 frontDotSizePx = 18f,
                 frontFlicker = 0.88f,
@@ -340,6 +340,11 @@ class MainActivity : AppCompatActivity() {
             WallpaperTuning.save(this, updated)
             refreshUi(updated)
         }
+        findViewById<Button>(R.id.btnPaletteSuperVivid).setOnClickListener {
+            val updated = WallpaperTuning.load(this).copy(paletteAsset = "pack_supervivid_test.json")
+            WallpaperTuning.save(this, updated)
+            refreshUi(updated)
+        }
     }
 
     private fun loadSelectedPreset(): WallpaperTuning {
@@ -403,6 +408,7 @@ class MainActivity : AppCompatActivity() {
         val label = when (tuning.paletteAsset) {
             "pack.json" -> "base"
             "pack_vivid_test.json" -> "vivid"
+            "pack_supervivid_test.json" -> "supervivid"
             else -> tuning.paletteAsset
         }
         paletteAssetLabel.text = "色セット: $label"

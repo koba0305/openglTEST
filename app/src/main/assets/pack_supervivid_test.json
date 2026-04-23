@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "seed": 77701,
+  "background": {
+    "hex": "#020006"
+  },
+  "palette": [
+    {
+      "hex": "#FF00F5",
+      "w": 0.22
+    },
+    {
+      "hex": "#00F5FF",
+      "w": 0.22
+    },
+    {
+      "hex": "#76FF00",
+      "w": 0.20
+    },
+    {
+      "hex": "#FF6A00",
+      "w": 0.18
+    },
+    {
+      "hex": "#FFF9E8",
+      "w": 0.18
+    }
+  ],
+  "layers": [
+    {
+      "id": "L1",
+      "depth": 0.0,
+      "parallax": 1.0,
+      "opacity": 0.94,
+      "fps": 60,
+      "palette_bias": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": "L2",
+      "depth": 0.25,
+      "parallax": 0.7,
+      "opacity": 0.92,
+      "fps": 45,
+      "palette_bias": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "L3",
+      "depth": 0.5,
+      "parallax": 0.45,
+      "opacity": 0.9,
+      "fps": 30,
+      "palette_bias": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": "L4",
+      "depth": 0.75,
+      "parallax": 0.25,
+      "opacity": 0.88,
+      "fps": 24,
+      "palette_bias": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "L5",
+      "depth": 1.0,
+      "parallax": 0.1,
+      "opacity": 1.0,
+      "fps": 15,
+      "palette_bias": [
+        4,
+        0
+      ]
+    }
+  ],
+  "glitch_ops": {
+    "feedback_delay": {
+      "per_layer": {
+        "L1": 0.05,
+        "L2": 0.1,
+        "L3": 0.16,
+        "L4": 0.22,
+        "L5": 0.3
+      },
+      "range": [
+        0.0,
+        0.6
+      ]
+    },
+    "advection_flow": {
+      "base": 0.3,
+      "flow_source": "dominant_angle_or_flow",
+      "layer_gain": {
+        "L1": 0.6,
+        "L2": 0.8,
+        "L3": 1.0,
+        "L4": 1.2,
+        "L5": 1.4
+      }
+    },
+    "rolling_scan_skew": {
+      "base": 0.45,
+      "phase_deg": 0
+    },
+    "blue_noise_dropout": {
+      "prob": 0.084,
+      "palette_lock": true
+    },
+    "tile_quantize": {
+      "tile": 8,
+      "strength": 0.292
+    },
+    "chroma_phase_lag": {
+      "base": 0.14,
+      "max": 0.35
+    },
+    "rgb_split": {
+      "px": 1.0,
+      "dir": "dominant_angle"
+    }
+  }
+}
