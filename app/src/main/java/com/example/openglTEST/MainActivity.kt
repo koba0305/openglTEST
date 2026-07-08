@@ -4,6 +4,7 @@ import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.RadioGroup
 import android.widget.SeekBar
@@ -39,97 +40,57 @@ class MainActivity : AppCompatActivity() {
 
     private val presets by lazy {
         listOf(
-            Preset("P1", "P1 Default", WallpaperTuning.DEFAULT.copy(presetId = "P1")),
-            Preset("P2", "P2 Depth", WallpaperTuning.DEFAULT.copy(
-                presetId = "P2",
+            Preset("P1", "ザビモノ", WallpaperTuning.DEFAULT.copy(
+                presetId = "P1",
                 paletteAsset = "pack.json",
-                rgbSplitPx = 6f,
-                frontDotSizePx = 10f,
-                frontFlicker = 0.52f,
-                l0MaxSizePx = 96f,
-                stripeMaxWidthRatio = 0.14f,
-                parallaxSensitivity = 1.85f,
-                flickerMode = WallpaperTuning.FLICKER_MODE_TILT,
-                colorVariance = 0.44f,
-                accentChance = 0.08f
-            )),
-            Preset("P3", "P3 Vivid", WallpaperTuning.DEFAULT.copy(
-                presetId = "P3",
-                paletteAsset = "pack_vivid_test.json",
-                rgbSplitPx = 14f,
-                frontDotSizePx = 15f,
-                frontFlicker = 0.84f,
-                l0MaxSizePx = 132f,
-                stripeMaxWidthRatio = 0.20f,
-                parallaxSensitivity = 1.28f,
-                flickerMode = WallpaperTuning.FLICKER_MODE_ALWAYS,
-                colorVariance = 0.86f,
-                accentChance = 0.26f
-            )),
-            Preset("P4", "P4 Thin", WallpaperTuning.DEFAULT.copy(
-                presetId = "P4",
-                paletteAsset = "pack.json",
-                rgbSplitPx = 4f,
-                frontDotSizePx = 8f,
-                frontFlicker = 0.46f,
-                l0MaxSizePx = 82f,
-                stripeMaxWidthRatio = 0.08f,
-                parallaxSensitivity = 1.12f,
-                flickerMode = WallpaperTuning.FLICKER_MODE_NONE,
-                colorVariance = 0.38f,
-                accentChance = 0.06f
-            )),
-            Preset("P5", "P5 Corrupt", WallpaperTuning.DEFAULT.copy(
-                presetId = "P5",
-                paletteAsset = "pack_supervivid_test.json",
                 rgbSplitPx = 18f,
-                frontDotSizePx = 22f,
-                frontFlicker = 0.96f,
-                l0MaxSizePx = 188f,
-                stripeMaxWidthRatio = 0.24f,
-                parallaxSensitivity = 1.42f,
-                flickerMode = WallpaperTuning.FLICKER_MODE_ALWAYS,
-                colorVariance = 0.92f,
+                frontDotSizePx = 18f,
+                frontFlicker = 0.98f,
+                l0MaxSizePx = 210f,
+                stripeMaxWidthRatio = 0.30f,
+                parallaxSensitivity = 0.82f,
+                flickerMode = WallpaperTuning.FLICKER_MODE_TILT,
+                colorVariance = 0.00f,
+                accentChance = 0.00f
+            )),
+            Preset("P2", "ザビカラー", WallpaperTuning.DEFAULT.copy(
+                presetId = "P2",
+                paletteAsset = "pack_supervivid_test.json",
+                rgbSplitPx = 24f,
+                frontDotSizePx = 16f,
+                frontFlicker = 1.00f,
+                l0MaxSizePx = 220f,
+                stripeMaxWidthRatio = 0.34f,
+                parallaxSensitivity = 0.88f,
+                flickerMode = WallpaperTuning.FLICKER_MODE_TILT,
+                colorVariance = 0.70f,
                 accentChance = 0.32f
             )),
-            Preset("P6", "P6 Drift", WallpaperTuning.DEFAULT.copy(
-                presetId = "P6",
-                paletteAsset = "pack_vivid_test.json",
-                rgbSplitPx = 10f,
-                frontDotSizePx = 12f,
-                frontFlicker = 0.64f,
-                l0MaxSizePx = 116f,
-                stripeMaxWidthRatio = 0.16f,
-                parallaxSensitivity = 2.25f,
-                flickerMode = WallpaperTuning.FLICKER_MODE_TILT,
-                colorVariance = 0.60f,
-                accentChance = 0.14f
-            )),
-            Preset("P7", "P7 Quiet", WallpaperTuning.DEFAULT.copy(
-                presetId = "P7",
+            Preset("P3", "ゆらモノ", WallpaperTuning.DEFAULT.copy(
+                presetId = "P3",
                 paletteAsset = "pack.json",
                 rgbSplitPx = 3f,
-                frontDotSizePx = 6f,
+                frontDotSizePx = 24f,
                 frontFlicker = 0.18f,
-                l0MaxSizePx = 64f,
-                stripeMaxWidthRatio = 0.10f,
-                parallaxSensitivity = 0.82f,
-                flickerMode = WallpaperTuning.FLICKER_MODE_NONE,
-                colorVariance = 0.30f,
-                accentChance = 0.04f
+                l0MaxSizePx = 180f,
+                stripeMaxWidthRatio = 0.08f,
+                parallaxSensitivity = 2.75f,
+                flickerMode = WallpaperTuning.FLICKER_MODE_TILT,
+                colorVariance = 0.00f,
+                accentChance = 0.00f
             )),
-            Preset("P8", "P8 Neon", WallpaperTuning.DEFAULT.copy(
-                presetId = "P8",
-                paletteAsset = "pack_supervivid_test.json",
-                rgbSplitPx = 20f,
-                frontDotSizePx = 18f,
-                frontFlicker = 0.88f,
-                l0MaxSizePx = 156f,
-                stripeMaxWidthRatio = 0.28f,
-                parallaxSensitivity = 1.66f,
-                flickerMode = WallpaperTuning.FLICKER_MODE_ALWAYS,
-                colorVariance = 1.00f,
-                accentChance = 0.40f
+            Preset("P4", "ゆらカラー", WallpaperTuning.DEFAULT.copy(
+                presetId = "P4",
+                paletteAsset = "pack_vivid_test.json",
+                rgbSplitPx = 6f,
+                frontDotSizePx = 22f,
+                frontFlicker = 0.24f,
+                l0MaxSizePx = 190f,
+                stripeMaxWidthRatio = 0.10f,
+                parallaxSensitivity = 3.00f,
+                flickerMode = WallpaperTuning.FLICKER_MODE_TILT,
+                colorVariance = 0.58f,
+                accentChance = 0.20f
             ))
         )
     }
@@ -215,8 +176,14 @@ class MainActivity : AppCompatActivity() {
         bindPresetActions()
         bindPaletteButtons()
         val current = WallpaperTuning.load(this)
-        selectedPresetId = current.presetId
-        refreshUi(current)
+        val safeCurrent = if (presets.any { it.id == current.presetId }) {
+            current
+        } else {
+            presets.first().tuning
+        }
+        selectedPresetId = safeCurrent.presetId
+        WallpaperTuning.save(this, safeCurrent)
+        refreshUi(safeCurrent)
 
         // ボタンで壁紙設定画面へ
         findViewById<Button>(R.id.btnSetWallpaper).setOnClickListener {
@@ -294,9 +261,13 @@ class MainActivity : AppCompatActivity() {
             R.id.presetBtn1, R.id.presetBtn2, R.id.presetBtn3, R.id.presetBtn4,
             R.id.presetBtn5, R.id.presetBtn6, R.id.presetBtn7, R.id.presetBtn8
         )
+        buttonIds.forEach { buttonId ->
+            findViewById<Button>(buttonId).visibility = View.GONE
+        }
         presets.zip(buttonIds).forEach { (preset, buttonId) ->
             findViewById<Button>(buttonId).apply {
-                text = preset.id
+                visibility = View.VISIBLE
+                text = preset.label
                 setOnClickListener {
                     selectedPresetId = preset.id
                     updateSelectedPresetLabel()

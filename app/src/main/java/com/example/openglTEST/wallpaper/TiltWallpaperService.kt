@@ -116,7 +116,7 @@ class TiltWallpaperService : WallpaperService() {
         // ----------------- Sensors -----------------
         private fun startSensors() {
             rotVec?.let {
-                sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
+                sensorManager.registerListener(this, it, SENSOR_PERIOD_US)
             }
         }
 
@@ -240,6 +240,7 @@ class TiltWallpaperService : WallpaperService() {
                 val startNs = System.nanoTime()
 
                 while (running) {
+                    val frameStartNs = System.nanoTime()
                     val disp = eglDisplay
                     val surf = eglSurface
                     val ctx = eglContext
@@ -287,7 +288,9 @@ class TiltWallpaperService : WallpaperService() {
                         Log.d(TAG, "rendering... f=$frame size=${width}x$height tilt=($tiltX,$tiltY)")
                     }
 
-                    try { Thread.sleep(8) } catch (_: InterruptedException) {}
+                    val elapsedNs = System.nanoTime() - frameStartNs
+                    val sleepMs = ((TARGET_FRAME_NS - elapsedNs) / 1_000_000L).coerceAtLeast(1L)
+                    try { Thread.sleep(sleepMs) } catch (_: InterruptedException) {}
                 }
             }.apply {
                 name = "GLThread(LiveWallpaper)"
@@ -308,6 +311,8 @@ class TiltWallpaperService : WallpaperService() {
 
     companion object {
         private const val TAG = "TiltWP"
+        private const val TARGET_FRAME_NS = 33_333_333L
+        private const val SENSOR_PERIOD_US = 33_333
     }
 }
 
@@ -372,6 +377,91 @@ private class GridRenderer(
     private val vbo = IntArray(1)
     private var tuning = WallpaperTuning.load(context)
 
+    private data class NoiseProfile(
+        val parallaxBoost: Float = 1f,
+        val fineDensity: Float = 1f,
+        val fineCellScale: Float = 1f,
+        val coarseDensity: Float = 1f,
+        val coarseSizeScale: Float = 1f,
+        val coarseAlpha: Float = 1f,
+        val l0Density: Float = 1f,
+        val l0CellScale: Float = 1f,
+        val flickerBoost: Float = 1f,
+        val stripeFillScale: Float = 1f,
+        val stripeWidthScale: Float = 1f,
+        val jumpBoost: Float = 1f,
+        val splitBoost: Float = 1f,
+        val bandBoost: Float = 1f
+    )
+
+    private fun noiseProfile(presetId: String): NoiseProfile = when (presetId) {
+        "P1" -> NoiseProfile(
+            parallaxBoost = 0.45f,
+            fineDensity = 1.55f,
+            fineCellScale = 0.78f,
+            coarseDensity = 2.35f,
+            coarseSizeScale = 1.18f,
+            coarseAlpha = 1.12f,
+            l0Density = 2.35f,
+            l0CellScale = 0.78f,
+            flickerBoost = 2.30f,
+            stripeFillScale = 1.90f,
+            stripeWidthScale = 0.92f,
+            jumpBoost = 2.10f,
+            splitBoost = 1.75f,
+            bandBoost = 1.85f
+        )
+        "P2" -> NoiseProfile(
+            parallaxBoost = 0.50f,
+            fineDensity = 1.70f,
+            fineCellScale = 0.72f,
+            coarseDensity = 2.60f,
+            coarseSizeScale = 1.12f,
+            coarseAlpha = 1.20f,
+            l0Density = 2.70f,
+            l0CellScale = 0.72f,
+            flickerBoost = 2.55f,
+            stripeFillScale = 2.10f,
+            stripeWidthScale = 0.86f,
+            jumpBoost = 2.35f,
+            splitBoost = 2.40f,
+            bandBoost = 2.05f
+        )
+        "P3" -> NoiseProfile(
+            parallaxBoost = 1.70f,
+            fineDensity = 0.42f,
+            fineCellScale = 1.80f,
+            coarseDensity = 0.58f,
+            coarseSizeScale = 1.65f,
+            coarseAlpha = 0.62f,
+            l0Density = 0.45f,
+            l0CellScale = 1.85f,
+            flickerBoost = 0.24f,
+            stripeFillScale = 0.42f,
+            stripeWidthScale = 1.30f,
+            jumpBoost = 0.42f,
+            splitBoost = 0.25f,
+            bandBoost = 0.40f
+        )
+        "P4" -> NoiseProfile(
+            parallaxBoost = 1.85f,
+            fineDensity = 0.52f,
+            fineCellScale = 1.55f,
+            coarseDensity = 0.70f,
+            coarseSizeScale = 1.55f,
+            coarseAlpha = 0.70f,
+            l0Density = 0.55f,
+            l0CellScale = 1.65f,
+            flickerBoost = 0.30f,
+            stripeFillScale = 0.52f,
+            stripeWidthScale = 1.15f,
+            jumpBoost = 0.50f,
+            splitBoost = 0.55f,
+            bandBoost = 0.48f
+        )
+        else -> NoiseProfile()
+    }
+
     // ---------- layers / palette ----------
     private val layers: List<LayerCfg>
     private var paletteFloats: List<FloatArray>
@@ -385,12 +475,7 @@ private class GridRenderer(
             LayerCfg("L4", 0.75, 0.25, 0.9, 24, listOf(0, 1)),
             LayerCfg("L5", 1.0, 0.1, 1.0, 15, listOf(0, 1))
         )
-        layers = (
-            baseLayers +
-                LayerCfg("L3.5", 0.62, 0.35, 0.52, 28, listOf(0, 1)) +
-                LayerCfg("L3.2", 0.42, 0.52, 0.44, 32, listOf(0, 1))
-            )
-            .sortedBy { it.depth }
+        layers = baseLayers.sortedBy { it.depth }
 
         val rawPalette = pack?.palette ?: listOf(
             PaletteItem("#00FF66", 1.0),
@@ -428,7 +513,17 @@ private class GridRenderer(
 
     private fun colorAt(index: Int): FloatArray {
         if (paletteFloats.isEmpty()) return floatArrayOf(0.5f, 0.8f, 0.3f)
-        return paletteFloats[index.mod(paletteFloats.size)]
+        val color = paletteFloats[index.mod(paletteFloats.size)]
+        return if (isMonochromePreset(tuning.presetId)) grayscaleColor(color) else color
+    }
+
+    private fun isMonochromePreset(presetId: String): Boolean = presetId == "P1" || presetId == "P3"
+
+    private fun isZabiPreset(presetId: String): Boolean = presetId == "P1" || presetId == "P2"
+
+    private fun grayscaleColor(c: FloatArray): FloatArray {
+        val y = (c[0] * 0.299f + c[1] * 0.587f + c[2] * 0.114f).coerceIn(0f, 1f)
+        return floatArrayOf(y, y, y)
     }
 
     private fun lerpColor(a: FloatArray, b: FloatArray, t: Float): FloatArray {
@@ -561,52 +656,31 @@ private class GridRenderer(
                         );
                         vec2 movedP = p + jump * baseSize * mix(0.45, 1.0, frontFlag);
                         vec2 coarse = floor(movedP / max(baseSize, vec2(1.0)));
-                        float hit = 0.0;
-                        vec3 col = uColor;
+                        float active = step(hash(coarse + vec2(uSeed, flickerT)), uDensity);
+                        if (active < 0.5) discard;
 
-                        for (int oy = -1; oy <= 1; oy++) {
-                            for (int ox = -1; ox <= 1; ox++) {
-                                vec2 c = coarse + vec2(float(ox), float(oy));
-                                float active = step(hash(c + vec2(uSeed, flickerT)), uDensity);
-                                if (active < 0.5) {
-                                    continue;
-                                }
+                        vec2 size = vec2(
+                            max(baseSize.x * mix(0.28, 2.4, hash(coarse + vec2(5.1, uSeed))), 1.0),
+                            max(baseSize.y * mix(0.24, 2.0, hash(coarse + vec2(8.3, uSeed))), 1.0)
+                        );
+                        vec2 localJitter = vec2(
+                            (hash(coarse + vec2(11.7, uSeed)) - 0.5) * baseSize.x * 0.85,
+                            (hash(coarse + vec2(13.9, uSeed)) - 0.5) * baseSize.y * 0.85
+                        );
+                        vec2 localP = mod(movedP + localJitter, baseSize);
+                        float insideRect = step(localP.x, size.x) * step(localP.y, size.y);
+                        if (insideRect < 0.5) discard;
 
-                                vec2 size = vec2(
-                                    max(baseSize.x * mix(0.22, 2.8, hash(c + vec2(5.1, uSeed))), 1.0),
-                                    max(baseSize.y * mix(0.18, 2.4, hash(c + vec2(8.3, uSeed))), 1.0)
-                                );
-                                vec2 anchor = c * baseSize;
-                                vec2 localJitter = vec2(
-                                    (hash(c + vec2(11.7, uSeed)) - 0.5) * baseSize.x * 1.3,
-                                    (hash(c + vec2(13.9, uSeed)) - 0.5) * baseSize.y * 1.3
-                                );
-                                vec2 minP = anchor + localJitter;
-                                vec2 maxP = minP + size;
-                                float insideRect = step(minP.x, movedP.x) * step(movedP.x, maxP.x) *
-                                    step(minP.y, movedP.y) * step(movedP.y, maxP.y);
-                                if (insideRect < 0.5) {
-                                    continue;
-                                }
+                        float collapse = step(
+                            hash(coarse + vec2(flickerT, uSeed * 0.11)),
+                            1.0 - (uDotBreakup * mix(0.42, 0.85, frontFlag))
+                        );
+                        if (collapse < 0.5) discard;
 
-                                float collapse = step(
-                                    hash(c + vec2(flickerT, uSeed * 0.11)),
-                                    1.0 - (uDotBreakup * mix(0.42, 0.85, frontFlag))
-                                );
-                                if (collapse < 0.5) {
-                                    continue;
-                                }
-
-                                float pick = hash(c + vec2(17.3, uSeed * 0.03));
-                                vec3 chosen = chooseDotColor(pick, hash(c + vec2(27.9, uSeed)));
-
-                                float flicker = mix(mix(0.72, 0.42, frontFlag), 1.0, hash(c + vec2(flickerT, 91.7)));
-                                col = chosen * flicker;
-                                hit = 1.0;
-                            }
-                        }
-
-                        if (hit < 0.5) discard;
+                        float pick = hash(coarse + vec2(17.3, uSeed * 0.03));
+                        vec3 chosen = chooseDotColor(pick, hash(coarse + vec2(27.9, uSeed)));
+                        float flicker = mix(mix(0.72, 0.42, frontFlag), 1.0, hash(coarse + vec2(flickerT, 91.7)));
+                        vec3 col = chosen * flicker;
                         gl_FragColor = vec4(col, uAlpha);
                         return;
                     }
@@ -777,10 +851,22 @@ private class GridRenderer(
         GLES20.glVertexAttribPointer(aPos, 2, GLES20.GL_FLOAT, false, 8, 0)
 
         val tiltLen = sqrt(tiltX * tiltX + tiltY * tiltY).coerceIn(0f, 1f)
+        val zabiPreset = isZabiPreset(tuning.presetId)
         val flickerGain = when (tuning.flickerMode) {
             WallpaperTuning.FLICKER_MODE_NONE -> 0f
             WallpaperTuning.FLICKER_MODE_TILT -> tiltMotion.coerceIn(0f, 1f)
-            else -> 1f
+            else -> if (zabiPreset) tiltMotion.coerceIn(0f, 1f) else 1f
+        }
+        val parallaxSensitivity = if (zabiPreset) {
+            tuning.parallaxSensitivity.coerceAtMost(0.90f)
+        } else {
+            tuning.parallaxSensitivity
+        }
+        val profile = noiseProfile(tuning.presetId)
+        val zabiMotionPulse = if (zabiPreset) {
+            (0.12f + 1.35f * flickerGain).coerceIn(0.12f, 1.25f)
+        } else {
+            1f
         }
 
         // time + tilt
@@ -805,9 +891,9 @@ private class GridRenderer(
 
             // ---- パララックス：いまより大きめ ----
             // 手前ほど大きく。さらに tiltLen で少し増える。
-            val depthFactor = 0.25f + 2.20f * tFront
-            val parallaxBase = 120f  // ★ここが「動きが小さい」問題の主因なので上げる
-            val parallaxPx = parallaxBase * tuning.parallaxSensitivity * depthFactor * (0.65f + 0.55f * tiltLen)
+            val depthFactor = 0.18f + 2.70f * tFront
+            val parallaxBase = 150f * profile.parallaxBoost
+            val parallaxPx = parallaxBase * parallaxSensitivity * depthFactor * (0.65f + 0.55f * tiltLen)
             val offX = tiltX * parallaxPx * (w / 1080f)
             val offY = tiltY * parallaxPx * (h / 1920f)
             GLES20.glUniform2f(uOffsetLoc, offX, offY)
@@ -822,7 +908,9 @@ private class GridRenderer(
 
                 // 線を増やす → 幅を「全体的に細く」するのが効く
                 // 手前ほど “太さレンジ” は大きくしてもよい
-                val stripeMaxWidth = (w * tuning.stripeMaxWidthRatio.coerceIn(0.02f, 0.5f)).coerceAtLeast(12f)
+                val stripeMaxWidth = (
+                    w * tuning.stripeMaxWidthRatio.coerceIn(0.02f, 0.5f) * profile.stripeWidthScale
+                ).coerceAtLeast(12f)
                 val stripeMin = (
                     4f + stripeMaxWidth * (0.12f + 0.14f * (1f - tFront))
                 ).coerceAtLeast(2f)
@@ -834,12 +922,16 @@ private class GridRenderer(
 
                 // スカスカ度：手前ほど小さく（＝線が減る）
                 // ここを下げると「奥が見える」ようになる
-                val fill = (0.18f + 0.56f * tuning.stripeMaxWidthRatio - 0.12f * tFront).coerceIn(0.08f, 0.86f)
+                val fill = (
+                    (0.18f + 0.56f * tuning.stripeMaxWidthRatio - 0.12f * tFront) *
+                        profile.stripeFillScale * zabiMotionPulse
+                    ).coerceIn(0.04f, 0.92f)
                 GLES20.glUniform1f(uStripeFillLoc, fill)
 
                 // 破壊ジャンプ量（tiltで増える）
-                val jumpPx = 10f + 55f * tiltLen + 25f * tFront
-                val yShiftPx = 6f + 40f * tiltLen + 16f * tFront
+                val motionJump = if (zabiPreset) zabiMotionPulse else 1f
+                val jumpPx = (10f + 55f * tiltLen + 25f * tFront) * profile.jumpBoost * motionJump
+                val yShiftPx = (6f + 40f * tiltLen + 16f * tFront) * profile.jumpBoost * motionJump
                 GLES20.glUniform1f(uJumpPxLoc, jumpPx)
                 GLES20.glUniform1f(uYShiftPxLoc, yShiftPx)
 
@@ -851,16 +943,16 @@ private class GridRenderer(
                 val rgbChaos = 0f
                 GLES20.glUniform1f(uRgbChaosLoc, rgbChaos)
                 val rgbSplitPx = if (idx == 3 || idx == 5) {
-                    (tuning.rgbSplitPx * 0.06f).coerceIn(0f, 1.2f)
+                    (tuning.rgbSplitPx * 0.06f * profile.splitBoost).coerceIn(0f, 4.5f)
                 } else {
                     0f
                 }
                 GLES20.glUniform1f(uRgbSplitPxLoc, rgbSplitPx)
 
                 val dotBreakup = when {
-                    idx >= 6 -> 0.32f
-                    idx == 5 -> (0.46f + 0.12f * tiltLen).coerceIn(0f, 1f)
-                    idx == 3 -> (0.38f + 0.10f * tiltLen).coerceIn(0f, 1f)
+                    idx >= 6 -> (0.32f * profile.flickerBoost * zabiMotionPulse).coerceIn(0f, 0.82f)
+                    idx == 5 -> ((0.46f + 0.12f * tiltLen) * profile.flickerBoost * zabiMotionPulse).coerceIn(0f, 0.88f)
+                    idx == 3 -> ((0.38f + 0.10f * tiltLen) * profile.flickerBoost * zabiMotionPulse).coerceIn(0f, 0.82f)
                     else -> 0f
                 }
                 GLES20.glUniform1f(uDotBreakupLoc, dotBreakup)
@@ -873,14 +965,14 @@ private class GridRenderer(
                 GLES20.glUniform1f(uFrontDotSizeLoc, frontDotSize)
 
                 val holdStrength = if (idx == 3 || idx == 5) {
-                    (0.34f + 0.46f * tiltLen).coerceIn(0f, 0.92f)
+                    ((0.34f + 0.46f * tiltLen) * profile.flickerBoost * zabiMotionPulse).coerceIn(0f, 0.98f)
                 } else {
-                    0.18f + 0.08f * tiltLen
+                    ((0.18f + 0.08f * tiltLen) * profile.flickerBoost * zabiMotionPulse).coerceIn(0f, 0.78f)
                 }
                 GLES20.glUniform1f(uHoldStrengthLoc, holdStrength)
 
                 val bandStrength = if (idx == 3 || idx == 5) {
-                    (0.58f + 0.18f * tiltLen).coerceIn(0f, 1f)
+                    ((0.58f + 0.18f * tiltLen) * profile.bandBoost * zabiMotionPulse).coerceIn(0f, 1f)
                 } else {
                     0.20f
                 }
@@ -911,13 +1003,12 @@ private class GridRenderer(
                     (0.18f + tuning.accentChance * 1.9f + 0.05f * (1f - tFront)).coerceIn(0f, 0.5f)
                 )
 
-                // L4は「細かく」したい → cellSize小さく
                 val cell = when (idx) {
                     1 -> (tuning.frontDotSizePx * 0.54f).coerceIn(3f, 14f)
                     2 -> (tuning.frontDotSizePx * 0.60f).coerceIn(3f, 16f)
                     4 -> (tuning.frontDotSizePx * 0.82f).coerceIn(4f, 20f)
                     else -> 2.2f
-                }
+                } * profile.fineCellScale
                 GLES20.glUniform1f(uCellSizeLoc, cell)
 
                 val density = when (idx) {
@@ -925,7 +1016,7 @@ private class GridRenderer(
                     2 -> (0.34f - 0.06f * tiltLen).coerceIn(0.18f, 0.40f)
                     4 -> (0.28f - 0.05f * tiltLen).coerceIn(0.14f, 0.34f)
                     else -> 0.24f
-                }
+                } * profile.fineDensity
                 GLES20.glUniform1f(uDensityLoc, density)
 
                 GLES20.glUniform1f(
@@ -948,17 +1039,17 @@ private class GridRenderer(
                 GLES20.glUniform1f(
                     uHoldStrengthLoc,
                     when (idx) {
-                        2 -> ((0.18f + 0.55f * tuning.frontFlicker) * flickerGain).coerceIn(0f, 1f)
-                        4 -> ((0.28f + 0.60f * tuning.frontFlicker) * flickerGain).coerceIn(0f, 1f)
-                        else -> ((0.12f + 0.18f * tiltLen) * flickerGain).coerceIn(0f, 1f)
+                        2 -> ((0.18f + 0.55f * tuning.frontFlicker) * flickerGain * profile.flickerBoost).coerceIn(0f, 1f)
+                        4 -> ((0.28f + 0.60f * tuning.frontFlicker) * flickerGain * profile.flickerBoost).coerceIn(0f, 1f)
+                        else -> ((0.12f + 0.18f * tiltLen) * flickerGain * profile.flickerBoost).coerceIn(0f, 1f)
                     }
                 )
                 GLES20.glUniform1f(uBandStrengthLoc, 0.20f)
                 GLES20.glUniform1f(
                     uFrontDotSizeLoc,
                     when (idx) {
-                        2 -> cell * 1.8f
-                        4 -> cell * 2.2f
+                        2 -> cell * 1.8f * profile.coarseSizeScale
+                        4 -> cell * 2.2f * profile.coarseSizeScale
                         else -> 1f
                     }
                 )
@@ -1003,7 +1094,7 @@ private class GridRenderer(
 
             // L4.5: L5 の直後に入る巨大矩形ノイズ
             if (idx == 0) {
-                val l45ParallaxPx = 120f * tuning.parallaxSensitivity * 0.28f * (0.55f + 0.20f * tiltLen)
+                val l45ParallaxPx = 150f * parallaxSensitivity * profile.parallaxBoost * 0.40f * (0.55f + 0.20f * tiltLen)
                 val l45Base = colorAt(0)
                 val l45Alt = colorAt(1)
                 val l45Weird = colorAt(paletteFloats.lastIndex.coerceAtLeast(0))
@@ -1012,21 +1103,21 @@ private class GridRenderer(
                 GLES20.glUniform3f(uWeirdColorLoc, l45Weird[0], l45Weird[1], l45Weird[2])
                 GLES20.glUniform1f(uColorVarianceLoc, (tuning.colorVariance * 0.85f).coerceIn(0f, 1f))
                 GLES20.glUniform1f(uAccentChanceLoc, (tuning.accentChance * 0.65f).coerceIn(0f, 0.5f))
-                GLES20.glUniform1f(uAlphaLoc, 0.72f)
+                GLES20.glUniform1f(uAlphaLoc, (0.72f * profile.coarseAlpha).coerceIn(0.12f, 0.92f))
                 GLES20.glUniform2f(
                     uOffsetLoc,
                     tiltX * l45ParallaxPx * (w / 1080f),
                     tiltY * l45ParallaxPx * (h / 1920f)
                 )
                 GLES20.glUniform1f(uModeLoc, 0f)
-                GLES20.glUniform1f(uDensityLoc, 0.20f)
-                GLES20.glUniform1f(uCellSizeLoc, 18f)
+                GLES20.glUniform1f(uDensityLoc, (0.20f * profile.coarseDensity).coerceIn(0.04f, 0.62f))
+                GLES20.glUniform1f(uCellSizeLoc, (18f * profile.coarseSizeScale).coerceIn(6f, 72f))
                 GLES20.glUniform1f(uSeedLoc, 611.3f)
                 GLES20.glUniform1f(uRgbSplitPxLoc, 0f)
-                GLES20.glUniform1f(uDotBreakupLoc, 0.38f)
-                GLES20.glUniform1f(uHoldStrengthLoc, (0.10f * flickerGain).coerceIn(0f, 1f))
+                GLES20.glUniform1f(uDotBreakupLoc, (0.38f * profile.flickerBoost * zabiMotionPulse).coerceIn(0.08f, 0.86f))
+                GLES20.glUniform1f(uHoldStrengthLoc, (0.10f * flickerGain * profile.flickerBoost * zabiMotionPulse).coerceIn(0f, 1f))
                 GLES20.glUniform1f(uBandStrengthLoc, 0f)
-                GLES20.glUniform1f(uFrontDotSizeLoc, 220f)
+                GLES20.glUniform1f(uFrontDotSizeLoc, (220f * profile.coarseSizeScale).coerceIn(48f, 520f))
                 GLES20.glUniform1f(uBandHeightLoc, 32f)
                 GLES20.glUniform1f(uStripeMinLoc, 0f)
                 GLES20.glUniform1f(uStripeMaxLoc, 0f)
@@ -1040,7 +1131,7 @@ private class GridRenderer(
         }
 
         // 最前面のドット崩壊専用レイヤー L0
-        val l0ParallaxPx = 120f * tuning.parallaxSensitivity * 3.1f * (0.75f + 0.55f * tiltLen)
+        val l0ParallaxPx = 150f * parallaxSensitivity * profile.parallaxBoost * 3.45f * (0.75f + 0.55f * tiltLen)
         val l0Base = colorAt(0)
         val l0Alt = colorAt(2.coerceAtMost(paletteFloats.lastIndex.coerceAtLeast(0)))
         val l0Weird = floatArrayOf(0.03f, 0.03f, 0.03f)
@@ -1056,14 +1147,14 @@ private class GridRenderer(
             tiltY * l0ParallaxPx * (h / 1920f)
         )
         GLES20.glUniform1f(uModeLoc, 0f)
-        GLES20.glUniform1f(uDensityLoc, 0.05f + 0.07f * (1f - tiltLen))
-        GLES20.glUniform1f(uCellSizeLoc, 3.2f)
+        GLES20.glUniform1f(uDensityLoc, ((0.05f + 0.07f * (1f - tiltLen)) * profile.l0Density).coerceIn(0.01f, 0.36f))
+        GLES20.glUniform1f(uCellSizeLoc, (3.2f * profile.l0CellScale).coerceIn(1.6f, 12f))
         GLES20.glUniform1f(uSeedLoc, 321.7f)
         GLES20.glUniform1f(uRgbSplitPxLoc, 0f)
-        GLES20.glUniform1f(uDotBreakupLoc, 0.64f)
-        GLES20.glUniform1f(uHoldStrengthLoc, ((0.36f + 0.62f * tuning.frontFlicker) * flickerGain).coerceIn(0f, 1f))
+        GLES20.glUniform1f(uDotBreakupLoc, (0.64f * profile.flickerBoost * zabiMotionPulse).coerceIn(0.06f, 0.94f))
+        GLES20.glUniform1f(uHoldStrengthLoc, ((0.36f + 0.62f * tuning.frontFlicker) * flickerGain * profile.flickerBoost * zabiMotionPulse).coerceIn(0f, 1f))
         GLES20.glUniform1f(uBandStrengthLoc, 0f)
-        GLES20.glUniform1f(uFrontDotSizeLoc, tuning.l0MaxSizePx.coerceIn(8f, 320f))
+        GLES20.glUniform1f(uFrontDotSizeLoc, (tuning.l0MaxSizePx * profile.coarseSizeScale).coerceIn(8f, 520f))
         GLES20.glUniform1f(uBandHeightLoc, 32f)
         GLES20.glUniform1f(uStripeMinLoc, 0f)
         GLES20.glUniform1f(uStripeMaxLoc, 0f)
@@ -1075,7 +1166,7 @@ private class GridRenderer(
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
 
         // 最前面の軽い画面破損オーバーレイ
-        val screenParallaxPx = 120f * tuning.parallaxSensitivity * 0.18f * (0.45f + 0.18f * tiltLen)
+        val screenParallaxPx = 150f * parallaxSensitivity * profile.parallaxBoost * 0.24f * (0.45f + 0.18f * tiltLen)
         val screenBase = floatArrayOf(0.98f, 0.98f, 0.98f)
         val screenAlt = colorAt(0)
         val screenWeird = colorAt(1.coerceAtMost(paletteFloats.lastIndex.coerceAtLeast(0)))
@@ -1096,15 +1187,15 @@ private class GridRenderer(
         GLES20.glUniform1f(uSeedLoc, 901.7f)
         GLES20.glUniform1f(uStripeMinLoc, 1f)
         GLES20.glUniform1f(uStripeMaxLoc, 3.2f)
-        GLES20.glUniform1f(uStripeFillLoc, 0.08f)
-        GLES20.glUniform1f(uJumpPxLoc, 24f + 46f * tiltLen)
-        GLES20.glUniform1f(uYShiftPxLoc, 12f + 28f * tiltLen)
+        GLES20.glUniform1f(uStripeFillLoc, (0.08f * profile.stripeFillScale * zabiMotionPulse).coerceIn(0.02f, 0.36f))
+        GLES20.glUniform1f(uJumpPxLoc, (24f + 46f * tiltLen) * profile.jumpBoost * zabiMotionPulse)
+        GLES20.glUniform1f(uYShiftPxLoc, (12f + 28f * tiltLen) * profile.jumpBoost * zabiMotionPulse)
         GLES20.glUniform1f(uScanPeriodLoc, 1.5f)
         GLES20.glUniform1f(uRgbChaosLoc, 0f)
-        GLES20.glUniform1f(uRgbSplitPxLoc, (2.8f + tuning.rgbSplitPx * 0.18f + 4.8f * tiltLen).coerceIn(0f, 9f))
-        GLES20.glUniform1f(uDotBreakupLoc, 0.22f)
-        GLES20.glUniform1f(uHoldStrengthLoc, ((0.24f + 0.52f * tuning.frontFlicker) * flickerGain).coerceIn(0f, 1f))
-        GLES20.glUniform1f(uBandStrengthLoc, 0.68f)
+        GLES20.glUniform1f(uRgbSplitPxLoc, ((2.8f + tuning.rgbSplitPx * 0.18f + 4.8f * tiltLen) * profile.splitBoost * zabiMotionPulse).coerceIn(0f, 28f))
+        GLES20.glUniform1f(uDotBreakupLoc, (0.22f * profile.flickerBoost * zabiMotionPulse).coerceIn(0.02f, 0.72f))
+        GLES20.glUniform1f(uHoldStrengthLoc, ((0.24f + 0.52f * tuning.frontFlicker) * flickerGain * profile.flickerBoost * zabiMotionPulse).coerceIn(0f, 1f))
+        GLES20.glUniform1f(uBandStrengthLoc, (0.68f * profile.bandBoost * zabiMotionPulse).coerceIn(0f, 1f))
         GLES20.glUniform1f(uFrontDotSizeLoc, 18f)
         GLES20.glUniform1f(uBandHeightLoc, 14f)
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)

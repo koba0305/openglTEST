@@ -37,16 +37,16 @@ data class WallpaperTuning(
 
         val DEFAULT = WallpaperTuning(
             presetId = "P1",
-            paletteAsset = "pack_vivid_test.json",
-            rgbSplitPx = 8f,
-            frontDotSizePx = 12f,
-            frontFlicker = 0.72f,
-            l0MaxSizePx = 120f,
-            stripeMaxWidthRatio = 0.18f,
-            parallaxSensitivity = 1.35f,
-            flickerMode = FLICKER_MODE_ALWAYS,
-            colorVariance = 0.58f,
-            accentChance = 0.16f
+            paletteAsset = "pack.json",
+            rgbSplitPx = 18f,
+            frontDotSizePx = 18f,
+            frontFlicker = 0.98f,
+            l0MaxSizePx = 210f,
+            stripeMaxWidthRatio = 0.30f,
+            parallaxSensitivity = 0.82f,
+            flickerMode = FLICKER_MODE_TILT,
+            colorVariance = 0.00f,
+            accentChance = 0.00f
         )
 
         fun load(context: Context): WallpaperTuning {
