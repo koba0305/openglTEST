@@ -1,411 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#161A12">
+    android:background="#151712"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/versionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Version"
+        android:textColor="#BFC7A5"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/presetCurrentValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="現在: ザビモノ"
+        android:textColor="#F0F3B2"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <GridLayout
+        android:id="@+id/presetGrid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
-
-        <TextView
-            android:id="@+id/versionText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Version"
-            android:textColor="#F4F0A8"
-            android:textSize="18sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Wallpaper Tuning"
-            android:textColor="#F5F27C"
-            android:textSize="28sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="ラインは維持しつつ、手前の壊れ方を調整します。壁紙が動作中なら値の保存後に切り替え直すと反映が分かりやすいです。"
-            android:textColor="#C9D180"
-            android:textSize="14sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:text="Look Presets"
-            android:textColor="#EAF59B"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/presetCurrentValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="現在: P1"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/presetSelectedValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="選択中: P1"
-            android:textColor="#C9D180"
-            android:textSize="14sp" />
-
-        <GridLayout
-            android:id="@+id/presetGrid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:columnCount="2"
-            android:rowCount="2"
-            android:useDefaultMargins="true">
-
-            <Button
-                android:id="@+id/presetBtn1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="P1" />
-
-            <Button
-                android:id="@+id/presetBtn2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="P2" />
-
-            <Button
-                android:id="@+id/presetBtn3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="P3" />
-
-            <Button
-                android:id="@+id/presetBtn4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="P4" />
-
-            <Button
-                android:id="@+id/presetBtn5"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="P5" />
-
-            <Button
-                android:id="@+id/presetBtn6"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="P6" />
-
-            <Button
-                android:id="@+id/presetBtn7"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="P7" />
-
-            <Button
-                android:id="@+id/presetBtn8"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="P8" />
-        </GridLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnEditPreset"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="パラメータ" />
-
-            <Button
-                android:id="@+id/btnPreviewPreset"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:text="プレビュー" />
-        </LinearLayout>
+        android:layout_marginTop="22dp"
+        android:columnCount="2"
+        android:rowCount="2"
+        android:useDefaultMargins="true">
 
         <Button
-            android:id="@+id/btnSavePreset"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="このプリセットに保存" />
-
-        <TextView
-            android:id="@+id/editingPresetValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="編集中: なし"
-            android:textColor="#C9D180"
-            android:textSize="13sp" />
-
-        <TextView
-            android:id="@+id/paletteAssetValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="色セット: vivid"
-            android:textColor="#F5F27C"
-            android:textSize="13sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnPaletteBase"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="色: base" />
-
-            <Button
-                android:id="@+id/btnPaletteVivid"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:text="色: vivid" />
-        </LinearLayout>
+            android:id="@+id/presetBtn1"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_columnWeight="1"
+            android:text="1\nザビモノ"
+            android:textSize="16sp" />
 
         <Button
-            android:id="@+id/btnPaletteSuperVivid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="色: supervivid" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="RGBずれ"
-            android:textColor="#EAF59B"
+            android:id="@+id/presetBtn2"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_columnWeight="1"
+            android:text="2\nザビカラー"
             android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/rgbSplitValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/rgbSplitSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="パララックス感度"
-            android:textColor="#EAF59B"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/parallaxValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/parallaxSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="チカチカ方式"
-            android:textColor="#EAF59B"
-            android:textSize="16sp" />
-
-        <RadioGroup
-            android:id="@+id/flickerModeGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/flickerModeAlways"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="常にチカチカ"
-                android:textColor="#F5F27C" />
-
-            <RadioButton
-                android:id="@+id/flickerModeTilt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="動きでチカチカ"
-                android:textColor="#F5F27C" />
-
-            <RadioButton
-                android:id="@+id/flickerModeNone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="チカチカなし"
-                android:textColor="#F5F27C" />
-        </RadioGroup>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="手前ドットサイズ"
-            android:textColor="#EAF59B"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/frontDotSizeValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/frontDotSizeSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="手前チカチカ量"
-            android:textColor="#EAF59B"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/frontDotBreakupValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/frontDotBreakupSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="L0最大サイズ"
-            android:textColor="#EAF59B"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/l0MaxSizeValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/l0MaxSizeSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="縦帯の最大幅"
-            android:textColor="#EAF59B"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/stripeMaxWidthValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/stripeMaxWidthSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="色の幅"
-            android:textColor="#EAF59B"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/colorVarianceValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/colorVarianceSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="異色の混ざり"
-            android:textColor="#EAF59B"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/accentChanceValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#F5F27C"
-            android:textSize="14sp" />
-
-        <SeekBar
-            android:id="@+id/accentChanceSeek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/btnSetWallpaper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:text="ライブ壁紙を設定" />
+            android:id="@+id/presetBtn3"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_columnWeight="1"
+            android:text="3\nゆらモノ"
+            android:textSize="16sp" />
 
-    </LinearLayout>
-</ScrollView>
+        <Button
+            android:id="@+id/presetBtn4"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_columnWeight="1"
+            android:text="4\nゆらカラー"
+            android:textSize="16sp" />
+    </GridLayout>
+
+    <Button
+        android:id="@+id/btnSetWallpaper"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="24dp"
+        android:text="壁紙に設定"
+        android:textSize="16sp" />
+</LinearLayout>
